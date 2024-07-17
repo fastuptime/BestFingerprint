@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Gelişmiş Cihaz Parmak İzi</title>
+      <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.0.4/dist/tailwind.min.css" rel="stylesheet">
+    </head>
+    <body class="bg-gray-100 text-gray-800">
+      <div class="min-h-screen flex flex-col items-center justify-center py-12">
+        <h1 class="text-3xl font-bold mb-4">Gelişmiş Cihaz Parmak İzi</h1>
+        <p id="fingerprintDisplay" class="text-lg mb-4">Parmak İzi yükleniyor...</p>
+        <button onclick="location.reload()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">Sayfayı Yenile</button>
+      </div>
+
+      <script>
+        function getCanvasFingerprint() {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          const txt = 'abcdefghijklmnopqrstuvwxyz0123456789';
+          ctx.textBaseline = "top";
+          ctx.font = "14px 'Arial'";
+          ctx.textBaseline = "alphabetic";
+          ctx.fillStyle = "#f60";
+          ctx.fillRect(125,1,62,20);
+          ctx.fillStyle = "#069";
+          ctx.fillText(txt, 2, 15);
+          ctx.fillStyle = "rgba(102, 204, 0, 0.7)";
+          ctx.fillText(txt, 4, 17);
+          return canvas.toDataURL();
+        }
+
+        function getWebGLInfo() {
+          const canvas = document.createElement('canvas');
+          const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+          if (!gl) return null;
+
+          const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+          if (!debugInfo) return null;
+
+          const vendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
+          const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+
+          return { vendor, renderer };
+        }
+
+        function generateFingerprint() {
+          const webGLInfo = getWebGLInfo();
+          const components = [
+            navigator.language,
+            new Date().getTimezoneOffset(),
+            navigator.hardwareConcurrency,
+            navigator.deviceMemory,
+            navigator.platform,
+            navigator.vendor,
+            getCanvasFingerprint(),
+            webGLInfo ? webGLInfo.vendor : 'unknown',
+            webGLInfo ? webGLInfo.renderer : 'unknown'
+          ];
+          console.log(components);
+
+          const fingerprintString = components.join('|');
+          const fingerprint = btoa(fingerprintString).replace(/=/g, '').substr(0, 32);
+
+          return fingerprint;
+        }
+
+        function saveFingerprint() {
+          const fingerprint = generateFingerprint();
+          localStorage.setItem('deviceFingerprint', fingerprint);
+          document.getElementById('fingerprintDisplay').textContent = `Parmak İziniz: ${fingerprint}`;
+        }
+
+        let fingerprint = localStorage.getItem('deviceFingerprint');
+        if (!fingerprint) {
+          saveFingerprint();
+        } else {
+          document.getElementById('fingerprintDisplay').textContent = 'Parmak İziniz: ' + fingerprint;
+        }
+      </script>
+    </body>
+    </html>
