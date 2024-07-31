@@ -14,7 +14,7 @@
       </div>
 
       <script>
-        function getCanvasFingerprint() {
+     function getCanvasFingerprint() {
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d');
           const txt = 'abcdefghijklmnopqrstuvwxyz0123456789';
@@ -29,21 +29,22 @@
           ctx.fillText(txt, 4, 17);
           return canvas.toDataURL();
         }
-
+        
         function getWebGLInfo() {
           const canvas = document.createElement('canvas');
           const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
           if (!gl) return null;
-
           const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
           if (!debugInfo) return null;
-
           const vendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
           const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
-
           return { vendor, renderer };
         }
-
+        
+        function isBrave() {
+          return navigator.brave && navigator.brave.isBrave && navigator.brave.isBrave() || false;
+        }
+        
         function generateFingerprint() {
           const webGLInfo = getWebGLInfo();
           const components = [
@@ -54,22 +55,34 @@
             navigator.vendor,
             getCanvasFingerprint(),
             webGLInfo ? webGLInfo.vendor : 'unknown',
-            webGLInfo ? webGLInfo.renderer : 'unknown'
+            webGLInfo ? webGLInfo.renderer : 'unknown',
+            screen.width,
+            screen.height,
+            screen.colorDepth,
+            navigator.language,
+            navigator.languages && navigator.languages.join(','),
+            'ontouchstart' in window,
+            navigator.maxTouchPoints,
+            navigator.doNotTrack,
+            new Intl.DateTimeFormat().resolvedOptions().timeZone
           ];
+        
+          if (isBrave()) {
+            components.push('brave-browser');
+          }
+        
           console.log(components);
-
           const fingerprintString = components.join('|');
           const fingerprint = btoa(fingerprintString).replace(/=/g, '').substr(0, 32);
-
           return fingerprint;
         }
-
+        
         function saveFingerprint() {
           const fingerprint = generateFingerprint();
           document.getElementById('fingerprintDisplay').textContent = `Parmak İziniz: ${fingerprint}`;
         }
-
-         saveFingerprint();
+        
+        saveFingerprint();
       </script>
     </body>
     </html>
