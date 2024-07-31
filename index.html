@@ -66,16 +66,10 @@
 
         function saveFingerprint() {
           const fingerprint = generateFingerprint();
-          localStorage.setItem('deviceFingerprint', fingerprint);
           document.getElementById('fingerprintDisplay').textContent = `Parmak İziniz: ${fingerprint}`;
         }
 
-        let fingerprint = localStorage.getItem('deviceFingerprint');
-        if (!fingerprint) {
-          saveFingerprint();
-        } else {
-          document.getElementById('fingerprintDisplay').textContent = 'Parmak İziniz: ' + fingerprint;
-        }
+         saveFingerprint();
       </script>
     </body>
     </html>
